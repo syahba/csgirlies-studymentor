@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200..800;1,200..800&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
 
 :root {
   /* main colors */
@@ -25,8 +25,8 @@
 
   /* font sizes */
   --body: 1.125rem;
-  --caption: 0.9rem;
-  --small: 0.719rem;
+  --caption: 0.875rem;
+  --small: 0.7rem;
 }
 
 body {
@@ -47,26 +47,41 @@ a, p, label, input {
 }
 
 h1 {
-  font-size: 3.431rem;
+  font-size: 2.5rem;
   font-weight: 700;
 }
 
 h2 {
-  font-size: 2.744rem;
+  font-size: 2.25rem;
   font-weight: 700;
 }
 
 h3 {
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 700;
 }
 
 h4 {
-  font-size: 1.756rem;
+  font-size: 1.5rem;
   font-weight: 700;
 }
 
 h5 {
-  font-size: 1.406rem;
+  font-size: 1.25rem;
   font-weight: 700;
+}
+
+.text-body {
+  font-size: var(--body);
+  font-weight: 400;
+}
+
+.text-caption {
+  font-size: var(--caption);
+  font-weight: 400;
+}
+
+.text-small {
+  font-size: var(--small);
+  font-weight: 400;
 }
