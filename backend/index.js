@@ -9,8 +9,10 @@ app.use(cors());
 app.use(express.json());
 
 import authRouter from "./routes/auth.routes.js"
+import tokenRouter from "./routes/token.route.js";
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/token", tokenRouter);
 
 app.get('/',(req, res) => {
   console.log('request')

@@ -1,7 +1,6 @@
 import { supabase } from "../utils/supabase.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
-import { log } from "console";
 
 export const register = async (req, res) => {
   const { email, password, name, age, year, school } = req.body;
@@ -49,16 +48,14 @@ export const register = async (req, res) => {
           school,
         },
       ])
-      .select() // important to get the inserted row back
+      .select() 
       .single();
 
     if (insertError) {
-      // rollback: delete the Auth user if table insert fails
       await supabase.auth.admin.deleteUser(authUser.user.id);
       throw insertError;
     }
 
-    // 4️⃣ Return success
     return res.status(201).json(
       new ApiResponse(
         201,
