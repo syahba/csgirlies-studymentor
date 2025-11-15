@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { AccessToken } from "livekit-server-sdk";
 
 dotenv.config();
 
@@ -9,7 +8,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+import authRouter from "./routes/auth.routes.js"
 
-app.listen(3001, () => {
-  console.log("backend running on http://localhost:3001");
+app.use("/api/v1/auth", authRouter);
+
+app.get('/',(req, res) => {
+  console.log('request')
+  res.status(200).send("OK")
+})
+app.listen(3001, 'localhost', () => {
+  console.log("Backend running at http://localhost:3001");
 });
