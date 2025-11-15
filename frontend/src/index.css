@@ -1,8 +1,72 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200..800;1,200..800&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
+  /* main colors */
+  --primary: #F57D31;
+  --secondary: #FFB850;
+  --accent-1: #F1634F;
+  --accent-2: #D6A5D2;
+  --accent-3: #55C2BC;
+  --neutral: #F7F7F0;
+  --black: #403D44;
+
+  /* lighter colors */
+  --lighter-primary: #FFC096;
+  --lighter-secondary: #FAE0AA;
+  --lighter-accent-1: #FFB7AF;
+  --lighter-accent-2: #FEE1F8;
+  --lighter-accent-3: #D2FEE6;
+
+  /* darker colors */
+  --darker-primary: #F16E1E;
+  --darker-secondary: #FADB84;
+  --darker-accent-2: #4F4CA0;
+
+  /* font sizes */
+  --body: 1.125rem;
+  --caption: 0.9rem;
+  --small: 0.719rem;
 }
 
 body {
   margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+a, p, label, input {
+  font-family: "Karla", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+h1 {
+  font-size: 3.431rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 2.744rem;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+h4 {
+  font-size: 1.756rem;
+  font-weight: 700;
+}
+
+h5 {
+  font-size: 1.406rem;
+  font-weight: 700;
 }
