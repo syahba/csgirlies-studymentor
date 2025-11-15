@@ -4,7 +4,8 @@ export const generate_token = async (req, res) => {
   try {
     console.log("generate token request");
 
-    const room = req.query.roomId || "default-room";
+    const room = req.query.room_name || "default-room";
+    // room_name should be unique and text
     const identity = req.query.id;
 
     const textInputs = req.body.input || "";

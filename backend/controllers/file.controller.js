@@ -1,37 +1,63 @@
-import PDFDocument from 'pdfkit';
-import fs from 'fs';
-import path from 'path';
+import { supabase } from "../utils/supabase.js";
+import PDFDocument from "pdfkit";
+import fs from "fs";
+import path from "path";
 
 export const upload_files = async (req, res) => {
+  const room_name = req.query.room_name;
+
+  if (!room_name) {
+    return res.status(400).json({ message: "room_name is required" });
+  }
+
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: "No files uploaded" });
     }
 
-    const uploadedFiles = req.files.map((file) => ({
-      id: path.basename(file.filename, path.extname(file.filename)),
-      originalName: file.originalname,
-      path: file.path,
-    }));
+    // Create folder for each room
+    const roomDir = path.resolve(`./uploads/${room_name}`);
+    if (!fs.existsSync(roomDir)) {
+      fs.mkdirSync(roomDir, { recursive: true });
+    }
 
-    res.status(200).json({ files: uploadedFiles });
+      const uploadedFiles = req.files.map((file) => {
+      const fileId = path.basename(file.filename, path.extname(file.filename));
+      const newFilePath = path.join(roomDir, file.originalname);
+
+      // Move file to new directory
+      fs.renameSync(file.path, newFilePath);
+
+      return {
+        id: fileId,
+        originalName: file.originalname,
+        path: newFilePath, 
+      };
+    });
+
+    return res.status(200).json({
+      room_name,
+      files: uploadedFiles,
+    });
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Upload failed", error: err.message });
+    return res.status(500).json({
+      message: "Upload failed",
+      error: err.message,
+    });
   }
 };
 
-/* ============================================================
-   GENERATE SUMMARY PDF
-============================================================ */
+
 export const generateSummaryPDF = async (req, res) => {
   try {
-    const { roomId, summary } = req.body;
+    const { room_name, summary } = req.body;
 
-    if (!roomId || !summary) {
+    if (!room_name || !summary) {
       return res
         .status(400)
-        .json({ error: "roomId and summary are required" });
+        .json({ error: "room_name and summary are required" });
     }
 
     const summariesDir = path.resolve("./summaries");
@@ -39,7 +65,7 @@ export const generateSummaryPDF = async (req, res) => {
       fs.mkdirSync(summariesDir, { recursive: true });
     }
 
-    const filePath = path.join(summariesDir, `${roomId}_summary.pdf`);
+    const filePath = path.join(summariesDir, `${room_name}_summary.pdf`);
     const stream = fs.createWriteStream(filePath);
 
     const doc = new PDFDocument();
@@ -61,17 +87,15 @@ export const generateSummaryPDF = async (req, res) => {
   }
 };
 
-/* ============================================================
-   DOWNLOAD SUMMARY PDF
-============================================================ */
-export const downloadSummaryPDF = (req, res) => {
-  const roomId = req.params.roomId || req.query.roomId;
 
-  if (!roomId) {
-    return res.status(400).json({ error: "roomId is required" });
+export const downloadSummaryPDF = (req, res) => {
+  const room_name = req.params.room_name || req.query.room_name;
+
+  if (!room_name) {
+    return res.status(400).json({ error: "room_name is required" });
   }
 
-  const filePath = path.resolve(`./summaries/${roomId}_summary.pdf`);
+  const filePath = path.resolve(`./summaries/${room_name}_summary.pdf`);
 
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ error: "PDF not found" });
@@ -79,7 +103,7 @@ export const downloadSummaryPDF = (req, res) => {
 
   res.setHeader(
     "Content-Disposition",
-    `attachment; filename=${roomId}_summary.pdf`
+    `attachment; filename=${room_name}_summary.pdf`
   );
   res.setHeader("Content-Type", "application/pdf");
 
