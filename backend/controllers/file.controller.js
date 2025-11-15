@@ -2,9 +2,8 @@ import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import path from 'path';
 
-export const upload_files = async(req, res) => {
+export const upload_files = async (req, res) => {
   try {
-    console.log("runnign upload file")
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: "No files uploaded" });
     }
@@ -22,53 +21,52 @@ export const upload_files = async(req, res) => {
   }
 };
 
+/* ============================================================
+   GENERATE SUMMARY PDF
+============================================================ */
 export const generateSummaryPDF = async (req, res) => {
   try {
     const { roomId, summary } = req.body;
-    console.log("Running generate PDF");
 
     if (!roomId || !summary) {
-      return res.status(400).json({ error: "roomId and summary are required" });
+      return res
+        .status(400)
+        .json({ error: "roomId and summary are required" });
     }
 
-    // Ensure summaries folder exists
-    const summariesDir = path.resolve('./summaries');
+    const summariesDir = path.resolve("./summaries");
     if (!fs.existsSync(summariesDir)) {
       fs.mkdirSync(summariesDir, { recursive: true });
     }
 
     const filePath = path.join(summariesDir, `${roomId}_summary.pdf`);
-
-    // Create a write stream
     const stream = fs.createWriteStream(filePath);
 
-    // Handle stream errors
-    stream.on('error', (err) => {
-      console.error('Stream error:', err);
-      return res.status(500).json({ error: 'Failed to write PDF file' });
-    });
-
-    // Create PDF
     const doc = new PDFDocument();
     doc.pipe(stream);
-    doc.text(summary, { align: 'left' });
+    doc.fontSize(14).text(summary, { align: "left" });
     doc.end();
 
-    // Respond when PDF is finished
-    stream.on('finish', () => {
-      console.log('PDF generation finished');
-      return res.json({ message: 'PDF generated', path: filePath });
+    stream.on("finish", () => {
+      res.json({ message: "PDF generated", path: filePath });
     });
 
+    stream.on("error", (err) => {
+      console.error("PDF stream error:", err);
+      res.status(500).json({ error: "Failed to generate PDF" });
+    });
   } catch (err) {
-    console.error('PDF generation error:', err);
-    return res.status(500).json({ error: 'Failed to generate PDF' });
+    console.error("PDF generation error:", err);
+    return res.status(500).json({ error: "Failed to generate PDF" });
   }
 };
 
+/* ============================================================
+   DOWNLOAD SUMMARY PDF
+============================================================ */
 export const downloadSummaryPDF = (req, res) => {
-  const { roomId } = req.query;
-  console.log("running download pdf")
+  const roomId = req.params.roomId || req.query.roomId;
+
   if (!roomId) {
     return res.status(400).json({ error: "roomId is required" });
   }
@@ -79,9 +77,11 @@ export const downloadSummaryPDF = (req, res) => {
     return res.status(404).json({ error: "PDF not found" });
   }
 
-  res.setHeader('Content-Disposition', `attachment; filename=${roomId}_summary.pdf`);
-  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=${roomId}_summary.pdf`
+  );
+  res.setHeader("Content-Type", "application/pdf");
 
-  const fileStream = fs.createReadStream(filePath);
-  fileStream.pipe(res);
+  fs.createReadStream(filePath).pipe(res);
 };

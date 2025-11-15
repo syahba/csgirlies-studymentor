@@ -11,7 +11,6 @@ export const generate_token = async (req, res) => {
     const filePaths = req.body.filePaths || [];
     const mentorId = req.body.mentorId || null;
 
-    // The combined metadata for the agent
     const session_context = {
       textInputs,
       filePaths,
@@ -23,7 +22,7 @@ export const generate_token = async (req, res) => {
       process.env.LIVEKIT_API_SECRET,
       {
         identity: identity,
-        metadata: JSON.stringify(session_context)   // MUST BE STRING
+        metadata: JSON.stringify(session_context)   
       }
     );
 
