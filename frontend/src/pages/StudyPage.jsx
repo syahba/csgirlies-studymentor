@@ -7,13 +7,33 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import PrimaryButton from "../components/common/PrimaryButton";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { mentorColorMap } from "../utils/mentorColors";
 
 function StudyPage() {
   const navigate = useNavigate();
 
+  // Get selected mentor ID from Redux
+  const mentorId = localStorage.getItem("lastMentor");;
+  const color = mentorColorMap[mentorId];
+
+  // Convert mentor color name → actual UI colors
+  let gradient, iconColor;
+  if (color === "light-yellow") {
+    gradient = "from-[var(--lighter-accent-1)] to-[var(--accent-1)]";
+    iconColor = "#403D44";
+  } else if (color === "purple") {
+    gradient = "from-[var(--lighter-accent-2)] to-[var(--accent-2)]";
+    iconColor = "var(--darker-accent-2)";
+  } else {
+    gradient = "from-[var(--lighter-accent-3)] to-[var(--accent-3)]";
+    iconColor = "var(--black)";
+  }
+
   return (
-    <div className="bg-linear-to-tr from-[var(--lighter-accent-2)] to-[var(--accent-2)] min-h-screen">
-      <Navbar accentColor={"red"}></Navbar>
+    <div className={`bg-linear-to-tr ${gradient} min-h-screen`}>
+      {/* navbar styled dynamically */}
+      <Navbar accentColor={color}></Navbar>
 
       <div className="flex flex-col gap-8 mt-2">
         <div className="flex justify-around">
@@ -22,7 +42,7 @@ function StudyPage() {
               icon={faEye}
               size="lg"
               style={{
-                color: "#4f4ca0",
+                color: iconColor,
                 backgroundColor: "var(--neutral)",
                 padding: "6.5px 5px",
                 borderRadius: "50%",
@@ -34,7 +54,7 @@ function StudyPage() {
               icon={faMicrophone}
               size="lg"
               style={{
-                color: "#4f4ca0",
+                color: iconColor,
                 backgroundColor: "var(--neutral)",
                 padding: "6.5px 5px",
                 borderRadius: "50%",
@@ -43,17 +63,19 @@ function StudyPage() {
               }}
             />
           </div>
+
           <FontAwesomeIcon
             icon={faXmark}
             size="lg"
             style={{
-              color: "#4f4ca0",
+              color: iconColor,
               backgroundColor: "var(--neutral)",
               padding: "6.5px 5px",
               borderRadius: "50%",
               boxShadow: "4px 4px 10px rgba(0,0,0,0.1)",
               cursor: "pointer",
             }}
+            onClick={() => navigate("/")}
           />
         </div>
 
@@ -125,7 +147,7 @@ function StudyPage() {
               <PrimaryButton
                 isBig={true}
                 text={"Re-explain"}
-                bgColor={"purple"}
+                bgColor={color}
               ></PrimaryButton>
             </div>
           </div>

@@ -79,7 +79,7 @@ export const uploadFiles = (formData, roomName) => {
   };
 };
 
-// add session -> payload {userId, room_name, file_paths }
+// add session -> payload {userId, room_name, file_path }
 export const addSession = (payload) => {
   return async () => {
     await axios.post(
@@ -87,6 +87,8 @@ export const addSession = (payload) => {
       payload,
       { headers: { "Content-Type": "application/json" } }
     );
+
+    localStorage.setItem("lastRoom", payload.room_name);
   };
 };
 

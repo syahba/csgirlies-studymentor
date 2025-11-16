@@ -4,10 +4,26 @@ import RegisterPage from './pages/RegisterPage.jsx'
 import SetUpPage from './pages/SetUpPage.jsx'
 import StudyPage from './pages/StudyPage.jsx'
 import QuizPage from './pages/QuizPage.jsx'
-import ErrorPage from './pages/ErrorPage.jsx'
 import SummaryPage from './pages/SummaryPage.jsx'
+import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { hydrateUser } from './redux/slices/userSlice.js'
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("user");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        dispatch(hydrateUser(parsed));
+      }
+    } catch (e) {
+      console.warn("Failed to hydrate user from localStorage", e);
+    }
+  }, [dispatch]);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -17,7 +33,6 @@ function App() {
         <Route path="/session/:id" element={<StudyPage></StudyPage>} />
         <Route path="/session/:id/quiz/:quizId" element={<QuizPage></QuizPage>} />
         <Route path="/session/:id/summary" element={<SummaryPage></SummaryPage>} />
-        <Route path="/error" element={<ErrorPage></ErrorPage>} />
       </Routes>
     </BrowserRouter>
   )
