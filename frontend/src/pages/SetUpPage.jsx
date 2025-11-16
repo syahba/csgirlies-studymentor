@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/common/Navbar";
@@ -19,6 +19,7 @@ import {
   addSession,
   selectMentor,
 } from "../redux/slices/setupSlice";
+import { getMentor } from "../redux/slices/mentorSlice";
 
 function SetUpPage() {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ function SetUpPage() {
   const reduxUploadedFiles = useSelector((state) => state.setup.uploadedFiles);
   const reduxFilePaths = useSelector((state) => state.setup.file_paths);
   const reduxUserId = useSelector((state) => state.user.userId);
+  const reduxMentor = useSelector((state) => state.mentor.mentor);
 
   // If not registered yet, use test fallback
   const userId = reduxUserId || "test-user-1";
@@ -37,41 +39,33 @@ function SetUpPage() {
   // ui state
   const [mentorIndex, setMentorIndex] = useState(0);
 
-  // replace with real data from api later
-  const mentors = [
-    {
-      id: "mentor_1",
-      name: "Mr. Abdul",
-      title: "The Supportive Teacher",
-      description:
-        "Mr. Abdul is a gentle, kind, and encouraging teacher who bla bla bla bla bla bla bla",
-      color: "purple",
-    },
-    {
-      id: "mentor_2",
-      name: "Coach Brian",
-      title: "The Strict Coach",
-      description:
-        "Mr. Abdul is a gentle, kind, and encouraging teacher who bla bla bla bla bla bla bla",
-      color: "light-yellow",
-    },
-    {
-      id: "mentor_3",
-      name: "Ms. Carson",
-      title: "The Chaotic Bestie",
-      description:
-        "Mr. Abdul is a gentle, kind, and encouraging teacher who bla bla bla bla bla bla bla",
-      color: "black",
-    },
+  // hardcoded ids to fetch mentor details
+  const mentorIds = [
+    "f2c0e241-070e-4b21-900e-b563bae60ee7", // Coach Rex (Strict)
+    "91b625ec-9096-4302-af35-6afe412722ab", // Miss Hana (Supportive)
+    "9d03a911-1a85-45cc-88b0-e0554cb4c7db", // Tia (Chaotic Bestie)
   ];
+  // mentor signature colors
+  const mentorColors = ["light-yellow", "purple", "black"];
+  // mentor titles
+  const mentorTitles = ["The Tough-Love Coach", "The Supportive Teacher", "The Chaotic Bestie"]
 
+  // fetch mentor 0 when page loads
+  useEffect(() => {
+    dispatch(getMentor(mentorIds[0]));
+  }, []);
+  
   // mentor carousel
   const nextHandler = () => {
-    setMentorIndex((prev) => (prev + 1) % mentors.length);
+    const newIndex = (mentorIndex + 1) % mentorIds.length;
+    setMentorIndex(newIndex);
+    dispatch(getMentor(mentorIds[newIndex])); // fetch backend mentor
   };
 
   const prevHandler = () => {
-    setMentorIndex((prev) => (prev - 1 + mentors.length) % mentors.length);
+    const newIndex = (mentorIndex - 1 + mentorIds.length) % mentorIds.length;
+    setMentorIndex(newIndex);
+    dispatch(getMentor(mentorIds[newIndex])); // fetch backend mentor
   };
 
   // topic input (save topic to Redux every keystroke + generate room name onBlur)
@@ -109,13 +103,11 @@ function SetUpPage() {
     }
 
     // save mentor selection to redux
-    dispatch(selectMentor(mentors[mentorIndex].id));
+    dispatch(selectMentor(mentorIds[mentorIndex]));
 
     // upload files (only if user selected any)
     if (reduxUploadedFiles.length > 0) {
       const formData = new FormData();
-      formData.append("topic", reduxTopic);
-
       reduxUploadedFiles.forEach((file) => {
         formData.append("files", file);
       });
@@ -147,7 +139,7 @@ function SetUpPage() {
   let smallTextColor;
   let labelColor;
 
-  if (mentorIndex === 0) {
+  if (mentorIndex === 1) {
     linearGradient = "from-[var(--lighter-accent-2)] to-[var(--accent-2)]";
     textColor = "text-[var(--darker-accent-2)]";
     outlineColor = "outline-[var(--darker-accent-2)]";
@@ -156,7 +148,7 @@ function SetUpPage() {
     iconColor = "var(--lighter-accent-2)";
     smallTextColor = "text-[var(--accent-2)]";
     labelColor = "text-[var(--neutral)]";
-  } else if (mentorIndex === 1) {
+  } else if (mentorIndex === 0) {
     linearGradient = "from-[var(--lighter-accent-1)] to-[var(--accent-1)]";
     textColor = "text-[var(--darker-secondary)]";
     outlineColor = "outline-[var(--darker-secondary)]";
@@ -178,7 +170,7 @@ function SetUpPage() {
 
   return (
     <div className={`bg-linear-to-tr ${linearGradient} min-h-screen`}>
-      <Navbar accentColor={mentors[mentorIndex].color}></Navbar>
+      <Navbar accentColor={mentorColors[mentorIndex]}></Navbar>
 
       <div className="flex flex-col justify-center">
         <h2 className="text-[var(--neutral)] text-center">
@@ -257,7 +249,7 @@ function SetUpPage() {
               <div className="bg-[var(--neutral)] p-5 rounded-3xl shadow-[4px_4px_16px_rgba(0,0,0,0.1)] mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-[var(--black)]">
-                    {mentors[mentorIndex].name}
+                    {reduxMentor?.data.name}
                   </h3>
                   <FontAwesomeIcon
                     icon={faVolumeHigh}
@@ -272,11 +264,11 @@ function SetUpPage() {
                 </div>
 
                 <p className={`text-body font-bold ${smallTextColor}`}>
-                  {mentors[mentorIndex].title}
+                  {mentorTitles[mentorIndex]}
                 </p>
 
                 <p className="text-body text-[var(--black)] max-w-96">
-                  {mentors[mentorIndex].description}
+                  {reduxMentor?.data.description}
                 </p>
               </div>
 
@@ -319,11 +311,11 @@ function SetUpPage() {
         </div>
 
         {/* Start / Back Buttons */}
-        <div className="flex flex-row-reverse gap-4 mr-12">
+        <div className="flex flex-row-reverse gap-4 mr-12 mb-6">
           <PrimaryButton
             isBig={true}
             text={"Start the Session"}
-            bgColor={mentors[mentorIndex].color}
+            bgColor={mentorColors[mentorIndex]}
             onClick={handleStartSession}
             isSubmit={true}
           ></PrimaryButton>
