@@ -7,9 +7,9 @@ function PrimaryButton({ bgColor, text, isBig, isSubmit = false, onClick }) {
 
   if (isBig) {
     padding = "py-2.5 px-8";
-    textSize = "text-lg";
   } else {
     padding = "py-2 px-5";
+    textSize = "text-sm";
   }
 
   if (bgColor === "yellow") {

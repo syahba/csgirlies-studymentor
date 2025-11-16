@@ -24,9 +24,9 @@
   --darker-accent-2: #4F4CA0;
 
   /* font sizes */
-  --body: 1.125rem;
-  --caption: 0.875rem;
-  --small: 0.7rem;
+  --body: 1rem;
+  --caption: 0.75rem;
+  --small: 0.625rem;
 }
 
 * {
