@@ -14,8 +14,6 @@ function Navbar({ accentColor }) {
     color = "text-[var(--black)]";
   }
 
-  console.log(accentColor, color);
-
   return (
     <nav className="w-screen text-center py-3">
       <h4 className="text-[var(--neutral)]">
