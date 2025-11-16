@@ -6,14 +6,14 @@ export const generate_token = async (req, res) => {
 
     const room = req.query.room_name || "default-room";
     // room_name should be unique and text
-    const identity = req.query.id;
+    const identity = req.query.userId;
 
-    const textInputs = req.body.input || "";
+    const textInput = req.body.input || "";
     const filePaths = req.body.filePaths || [];
     const mentorId = req.body.mentorId || null;
 
     const session_context = {
-      textInputs,
+      textInput,
       filePaths,
       mentorId
     };
