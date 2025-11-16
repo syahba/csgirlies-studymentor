@@ -1,22 +1,32 @@
-import '../../index.css';
+import "../../index.css";
+import PropTypes from "prop-types";
 
 function Navbar({ accentColor }) {
-  let color;
-  if (accentColor == 'yellow') {
-    color = 'var(--darker-secondary)';
-  } else if (accentColor == 'orange') {
-    color = 'var(--darker-primary)';
-  } else if (accentColor == 'blue') {
-    color = 'var(--darker-accent-2)';
+  let color = '';
+
+  if (accentColor == "orange") {
+    color = "text-[var(--darker-primary)]";
+  } else if (accentColor == "yellow") {
+    color = "text-[var(--darker-secondary)]";
+  } else if (accentColor == "blue") {
+    color = "text-[var(--darker-accent-2)]";
   } else {
-    color = 'var(--black)';
+    color = "text-[var(--black)]";
   }
 
+  console.log(accentColor, color);
+
   return (
-    <nav className='w-screen text-center py-3'>
-      <h4 className='text-[var(--neutral)]'><span className={`text-[${color}]`}>Grade</span>Up</h4>
+    <nav className="w-screen text-center py-3">
+      <h4 className="text-[var(--neutral)]">
+        <span className={`${color}`}>Grade</span>Up
+      </h4>
     </nav>
   );
 }
+
+Navbar.propTypes = {
+  accentColor: PropTypes.string,
+};
 
 export default Navbar;
