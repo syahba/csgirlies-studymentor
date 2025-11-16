@@ -59,7 +59,7 @@ export const create_session = async (req, res) => {
       .from("sessions")
       .insert([
         {
-          userId: userId,      // IMPORTANT: matches DB column name
+          userId: userId,     
           room_name: room_name,
           uploaded_files: file_path || []   // array of filenames
         }

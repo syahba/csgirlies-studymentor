@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
-import { connect } from "livekit-client";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setConnected } from "../redux/slices/setupSlice";
+import { Room } from "livekit-client";
+
 
 export const useLiveKitRoom = (userId) => {
   const [room, setRoom] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
-
   const session = useSelector((state) => state.setup);
+  const dispatch = useDispatch();
 
   useEffect(() => {
+    let liveRoom;     
+    console.log("running use livekit room")
     const initRoom = async () => {
       try {
         // 1️⃣ Fetch token
         const tokenRes = await fetch(
-          `http://localhost:3001/api/v1/token/get?room_name=${session.room_name}&userId=${userId}`,
+          `http://localhost:3001/api/v1/token/get?room_name=${session.room_name}&userId=d506456a-d099-4df4-b7f0-68b6bf740f97`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -26,23 +29,33 @@ export const useLiveKitRoom = (userId) => {
         );
 
         const tokenData = await tokenRes.json();
-        if (!tokenData?.token || !tokenData?.url) {
+        if (!tokenData?.token) {
           console.error("Invalid token data:", tokenData);
           return;
         }
+        console.log("token :: ", tokenData.token)
 
         // 2️⃣ Connect to LiveKit room
-        const room = await connect(tokenData.url, tokenData.token, {
-          autoSubscribe: true,
-        });
+        liveRoom = new Room();
+        try {
+          const livekit_url = import.meta.env.VITE_LIVEKIT_URL
+          console.log(livekit_url)
+          await liveRoom.connect(livekit_url, tokenData.token, {
+            autoSubscribe: true,
+          });
+  
+        } catch (error) {
+          console.log(error);
+          
+        }
+        setRoom(liveRoom);
+        dispatch(setConnected(true)); // ✅ Update Redux state
 
-        setRoom(room);
-        setIsConnected(true);
-
-        room.on("participantConnected", (p) => console.log("Joined:", p.identity));
-        room.on("participantDisconnected", (p) => console.log("Left:", p.identity));
+        liveRoom.on("participantConnected", (p) => console.log("Joined:", p.identity));
+        liveRoom.on("participantDisconnected", (p) => console.log("Left:", p.identity));
       } catch (err) {
         console.error("Error connecting to LiveKit room:", err);
+        dispatch(setConnected(false)); // failed to connect
       }
     };
 
@@ -50,8 +63,13 @@ export const useLiveKitRoom = (userId) => {
       initRoom();
     }
 
-    return () => room?.disconnect();
-  }, [session.room_name, session.input, session.file_paths, session.mentorId, userId]);
+    return () => {
+      if (liveRoom) {
+        liveRoom.disconnect();
+        dispatch(setConnected(false)); // reset on disconnect
+      }
+    };
+  }, [session.room_name, session.input, session.file_paths, session.mentorId, userId, dispatch]);
 
-  return { room, isConnected };
+  return { room, isConnected: session.connected }; // now reflects Redux state
 };

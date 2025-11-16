@@ -1,4 +1,6 @@
+// [Previous imports]
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useParticipants, RoomAudioRenderer, useLocalParticipant } from "@livekit/components-react";
 import Navbar from "../components/common/Navbar";
 import {
   faEye,
@@ -7,12 +9,34 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import PrimaryButton from "../components/common/PrimaryButton";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { AgentVideo } from "../components/livekit/videoComponent";
+import { StudyPageWrapper } from "../components/livekit/studyPageWrapper";
+import FlashCardContainer from "../components/flashcard/FlashCardContainer";
 
 function StudyPage() {
   const navigate = useNavigate();
+  const user = useSelector((state) => state.user);
+
+  return (
+    <StudyPageWrapper userId={user.userId}>
+      <StudyPageContent navigate={navigate} />
+    </StudyPageWrapper>
+  );
+}
+
+function StudyPageContent({ navigate }) {
+  const { localParticipant } = useLocalParticipant();
+  const [micEnabled, setMicEnabled] = useState(true);
+
+  useEffect(() => {
+    localParticipant.setMicrophoneEnabled(true);
+  }, [localParticipant]);
 
   return (
     <div className="bg-linear-to-tr from-[var(--lighter-accent-2)] to-[var(--accent-2)] min-h-screen">
+      <RoomAudioRenderer />
       <Navbar accentColor={"red"}></Navbar>
 
       <div className="flex flex-col gap-8 mt-2">
@@ -59,7 +83,7 @@ function StudyPage() {
 
         <div className="flex justify-center items-center gap-20">
           <div className="flex flex-col items-center justify-center gap-8">
-            <div className="bg-[var(--neutral)] w-[26rem] h-[26rem] rounded-full"></div>
+            <AgentVideo />
             <div className="text-[var(--neutral)] flex flex-col justify-center items-center gap-1 text-caption">
               <p className="bg-[var(--black)]/50 px-2">
                 Hi, Joe! Ready to study some ecosystems? Why dont you tell me
@@ -131,6 +155,9 @@ function StudyPage() {
           </div>
         </div>
       </div>
+
+      {/* Flash Card Container */}
+      <FlashCardContainer />
     </div>
   );
 }

@@ -34,7 +34,7 @@ function SetUpPage() {
   const reduxMentor = useSelector((state) => state.mentor.mentor);
 
   // If not registered yet, use test fallback
-  const userId = reduxUserId || "test-user-1";
+  const userId = reduxUserId || "49ea6d66-016a-4640-8fbe-7b072cf035c0";
 
   // ui state
   const [mentorIndex, setMentorIndex] = useState(0);
@@ -91,42 +91,50 @@ function SetUpPage() {
 
   // start session
   const handleStartSession = async () => {
-    if (!reduxTopic || reduxTopic.trim() === "") {
-      alert("Please enter a topic before starting.");
-      return;
+    try {
+      if (!reduxTopic || reduxTopic.trim() === "") {
+        alert("Please enter a topic before starting.");
+        return;
+      }
+
+      // ensure room name exists
+      let finalRoomName = reduxRoomName;
+      if (!finalRoomName) {
+        dispatch(generateRoomName(reduxTopic));
+        finalRoomName = reduxRoomName; // update after dispatch
+      }
+
+      // save mentor selection to redux
+      dispatch(selectMentor(mentors[mentorIndex].id));
+
+      // upload files (only if user selected any)
+      if (reduxUploadedFiles.length > 0) {
+        const formData = new FormData();
+        formData.append("topic", reduxTopic);
+
+        reduxUploadedFiles.forEach((file) => {
+          formData.append("files", file);
+        });
+
+        await dispatch(uploadFiles(formData, finalRoomName));
+      }
+
+      const finalFilePaths = reduxFilePaths || [];
+
+      // add session to backend
+      await dispatch(
+        addSession({
+          userId,
+          room_name: finalRoomName,
+          file_path: finalFilePaths,
+        })
+      );
+
+      navigate(`/session/${finalRoomName}`);
+    } catch (error) {
+      console.error("Error starting session:", error);
+      alert("Failed to start session. Please try again.");
     }
-
-    // ensure room name exists
-    let finalRoomName = reduxRoomName;
-    if (!finalRoomName) {
-      dispatch(generateRoomName(reduxTopic));
-    }
-
-    // save mentor selection to redux
-    dispatch(selectMentor(mentorIds[mentorIndex]));
-
-    // upload files (only if user selected any)
-    if (reduxUploadedFiles.length > 0) {
-      const formData = new FormData();
-      reduxUploadedFiles.forEach((file) => {
-        formData.append("files", file);
-      });
-
-      await dispatch(uploadFiles(formData, finalRoomName));
-    }
-
-    const finalFilePaths = reduxFilePaths || [];
-
-    // add session to backend
-    await dispatch(
-      addSession({
-        userId,
-        room_name: finalRoomName,
-        file_paths: finalFilePaths,
-      })
-    );
-
-    navigate(`/session/${finalRoomName}`);
   };
 
   // styling based on selected mentor

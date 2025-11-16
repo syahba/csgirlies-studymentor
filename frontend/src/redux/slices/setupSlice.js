@@ -7,6 +7,7 @@ const initialState = {
   uploadedFiles: [],   // raw File objects
   file_paths: [],      // backend-returned file paths
   mentorId: "",        // selected mentor
+  connected: false,    // LiveKit room connection status
 };
 
 const sessionSlice = createSlice({
@@ -21,17 +22,19 @@ const sessionSlice = createSlice({
       state.uploadedFiles = state.uploadedFiles.filter((_, i) => i !== action.payload);
     },
     setFilePaths: (state, action) => { state.file_paths = action.payload },
+    setConnected: (state, action) => { state.connected = action.payload },
     clearSession: (state) => {
       state.room_name = "";
       state.input = "";
       state.uploadedFiles = [];
       state.file_paths = [];
       state.mentorId = "";
+      state.connected = false;
     },
   },
 });
 
-export const { setRoomName, setInput, setMentorId, addFile, removeFile, setFilePaths, clearSession } =
+export const { setRoomName, setInput, setMentorId, addFile, removeFile, setFilePaths, setConnected, clearSession } =
   sessionSlice.actions;
 
 // room name -> topic (input) + datetime
@@ -79,14 +82,20 @@ export const uploadFiles = (formData, roomName) => {
   };
 };
 
-// add session -> payload {userId, room_name, file_paths }
+// add session -> payload {userId, room_name, file_path }
 export const addSession = (payload) => {
   return async () => {
-    await axios.post(
-      "http://localhost:3001/api/v1/session/add",
-      payload,
-      { headers: { "Content-Type": "application/json" } }
-    );
+    try {
+      await axios.post(
+        "http://localhost:3001/api/v1/session/add",
+        payload,
+        { headers: { "Content-Type": "application/json" } }
+      );
+    } catch (error) {
+      console.error("Error adding session:", error.response?.data || error.message);
+      // Optionally, you can dispatch an error action or throw to propagate
+      throw error;
+    }
   };
 };
 
