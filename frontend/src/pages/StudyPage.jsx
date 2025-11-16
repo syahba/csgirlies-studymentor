@@ -13,7 +13,7 @@ function StudyPage() {
 
   return (
     <div className="bg-linear-to-tr from-[var(--lighter-accent-2)] to-[var(--accent-2)] min-h-screen">
-      <Navbar accentColor={mentor.color}></Navbar>
+      <Navbar accentColor={"red"}></Navbar>
 
       <div className="flex flex-col gap-8 mt-2">
         <div className="flex justify-around">
