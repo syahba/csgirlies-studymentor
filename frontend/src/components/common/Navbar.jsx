@@ -6,9 +6,9 @@ function Navbar({ accentColor }) {
 
   if (accentColor == "orange") {
     color = "text-[var(--darker-primary)]";
-  } else if (accentColor == "yellow") {
+  } else if (accentColor == "light-yellow") {
     color = "text-[var(--darker-secondary)]";
-  } else if (accentColor == "blue") {
+  } else if (accentColor == "purple") {
     color = "text-[var(--darker-accent-2)]";
   } else {
     color = "text-[var(--black)]";

@@ -4,6 +4,7 @@ function PrimaryButton({ bgColor, text, isBig, isSubmit = false, onClick }) {
   let padding;
   let textSize;
   let background;
+  let textColor = "text-white";
 
   if (isBig) {
     padding = "py-2.5 px-8";
@@ -15,8 +16,8 @@ function PrimaryButton({ bgColor, text, isBig, isSubmit = false, onClick }) {
   if (bgColor === "yellow") {
     background = "bg-[var(--secondary)]";
   } else if (bgColor === "light-yellow") {
-    background = "bg-[var(--lighter-secondary)]";
-    textSize = +" text-[var(--black)]";
+    background = "bg-[var(--darker-secondary)]";
+    textColor = "text-[var(--black)]";
   } else if (bgColor === "orange") {
     background = "bg-[var(--primary)]";
   } else if (bgColor === "purple") {
@@ -31,7 +32,7 @@ function PrimaryButton({ bgColor, text, isBig, isSubmit = false, onClick }) {
       onClick={onClick}
       className={`${background} ${padding} rounded-3xl shadow-[4px_4px_12px_rgba(0,0,0,0.1)] hover:scale-105 transition-transform duration-200 ease-in-out cursor-pointer`}
     >
-      <p className={`text-white font-bold ${textSize}`}>{text}</p>
+      <p className={`${textColor} font-bold ${textSize}`}>{text}</p>
     </button>
   );
 }

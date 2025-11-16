@@ -11,7 +11,7 @@ function QuizPage() {
 
   return (
     <div className="bg-linear-to-tr from-[var(--lighter-accent-2)] to-[var(--accent-2)] min-h-screen">
-      <Navbar accentColor={"blue"}></Navbar>
+      <Navbar accentColor={"purple"}></Navbar>
 
       <div className="flex flex-row-reverse justify-center gap-6 mt-3">
         <FontAwesomeIcon

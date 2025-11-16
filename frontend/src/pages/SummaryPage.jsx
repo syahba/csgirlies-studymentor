@@ -9,7 +9,7 @@ function SummaryPage() {
 
   return (
     <div className="bg-linear-to-tr from-[var(--lighter-accent-2)] to-[var(--accent-2)] min-h-screen">
-      <Navbar accentColor={"blue"}></Navbar>
+      <Navbar accentColor={"purple"}></Navbar>
 
       <div className="flex flex-col gap-4 mt-2">
         <div className="flex justify-around">

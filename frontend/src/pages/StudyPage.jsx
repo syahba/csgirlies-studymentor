@@ -13,9 +13,9 @@ function StudyPage() {
 
   return (
     <div className="bg-linear-to-tr from-[var(--lighter-accent-2)] to-[var(--accent-2)] min-h-screen">
-      <Navbar accentColor={"blue"}></Navbar>
+      <Navbar accentColor={mentor.color}></Navbar>
 
-      <div className="flex flex-col gap-10 mt-2">
+      <div className="flex flex-col gap-8 mt-2">
         <div className="flex justify-around">
           <div className="flex gap-3">
             <FontAwesomeIcon
@@ -59,7 +59,7 @@ function StudyPage() {
 
         <div className="flex justify-center items-center gap-20">
           <div className="flex flex-col items-center justify-center gap-8">
-            <div className="bg-[var(--neutral)] w-[28rem] h-[28rem] rounded-full"></div>
+            <div className="bg-[var(--neutral)] w-[26rem] h-[26rem] rounded-full"></div>
             <div className="text-[var(--neutral)] flex flex-col justify-center items-center gap-1 text-caption">
               <p className="bg-[var(--black)]/50 px-2">
                 Hi, Joe! Ready to study some ecosystems? Why dont you tell me
