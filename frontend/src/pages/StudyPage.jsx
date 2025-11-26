@@ -1,6 +1,5 @@
-// [Previous imports]
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useParticipants, RoomAudioRenderer, useLocalParticipant } from "@livekit/components-react";
+import { useParticipants, RoomAudioRenderer, useLocalParticipant, useRoomContext } from "@livekit/components-react";
 import Navbar from "../components/common/Navbar";
 import {
   faEye,
@@ -11,11 +10,11 @@ import PrimaryButton from "../components/common/PrimaryButton";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useRoomContext } from "@livekit/components-react";
 import { AgentVideo } from "../components/livekit/videoComponent";
 import { StudyPageWrapper } from "../components/livekit/studyPageWrapper";
 import FlashCardContainer from "../components/flashcard/FlashCardContainer";
 import LLMTextDisplay from "../components/common/LLMTextDisplay";
+import { mentorColorMap } from "../utils/mentorColors";
 
 function StudyPage() {
   const navigate = useNavigate();
@@ -69,6 +68,23 @@ function StudyPageContent({ navigate }) {
     }
   };
 
+  // Get selected mentor ID from Redux
+  const mentorId = localStorage.getItem("lastMentor");;
+  const color = mentorColorMap[mentorId];
+
+  // Convert mentor color name → actual UI colors
+  let gradient, iconColor;
+  if (color === "light-yellow") {
+    gradient = "from-[var(--lighter-accent-1)] to-[var(--accent-1)]";
+    iconColor = "#403D44";
+  } else if (color === "purple") {
+    gradient = "from-[var(--lighter-accent-2)] to-[var(--accent-2)]";
+    iconColor = "var(--darker-accent-2)";
+  } else {
+    gradient = "from-[var(--lighter-accent-3)] to-[var(--accent-3)]";
+    iconColor = "var(--black)";
+  }
+
   return (
     <div className="bg-linear-to-tr from-[var(--lighter-accent-2)] to-[var(--accent-2)] min-h-screen">
       <RoomAudioRenderer />
@@ -81,7 +97,7 @@ function StudyPageContent({ navigate }) {
               icon={faEye}
               size="lg"
               style={{
-                color: "#4f4ca0",
+                color: iconColor,
                 backgroundColor: "var(--neutral)",
                 padding: "6.5px 5px",
                 borderRadius: "50%",
@@ -93,7 +109,7 @@ function StudyPageContent({ navigate }) {
               icon={faMicrophone}
               size="lg"
               style={{
-                color: "#4f4ca0",
+                color: iconColor,
                 backgroundColor: "var(--neutral)",
                 padding: "6.5px 5px",
                 borderRadius: "50%",
@@ -102,11 +118,12 @@ function StudyPageContent({ navigate }) {
               }}
             />
           </div>
+
           <FontAwesomeIcon
             icon={faXmark}
             size="lg"
             style={{
-              color: "#4f4ca0",
+              color: iconColor,
               backgroundColor: "var(--neutral)",
               padding: "6.5px 5px",
               borderRadius: "50%",
@@ -178,7 +195,7 @@ function StudyPageContent({ navigate }) {
               <PrimaryButton
                 isBig={true}
                 text={"Re-explain"}
-                bgColor={"purple"}
+                bgColor={color}
               ></PrimaryButton>
             </div>
           </div>

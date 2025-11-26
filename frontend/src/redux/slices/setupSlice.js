@@ -85,17 +85,13 @@ export const uploadFiles = (formData, roomName) => {
 // add session -> payload {userId, room_name, file_path }
 export const addSession = (payload) => {
   return async () => {
-    try {
-      await axios.post(
-        "http://localhost:3001/api/v1/session/add",
-        payload,
-        { headers: { "Content-Type": "application/json" } }
-      );
-    } catch (error) {
-      console.error("Error adding session:", error.response?.data || error.message);
-      // Optionally, you can dispatch an error action or throw to propagate
-      throw error;
-    }
+    await axios.post(
+      "http://localhost:3001/api/v1/session/add",
+      payload,
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    localStorage.setItem("lastRoom", payload.room_name);
   };
 };
 

@@ -1,50 +1,5 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-
-// Async thunk to fetch sessions
-export const fetchSessions = createAsyncThunk(
-  "sessions/fetchSessions",
-  async (userId) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3001/api/v1/session/all?userId=${userId}`
-      );
-      return response.data.data; // The API returns { data: sessions[] }
-    } catch (error) {
-      console.error("Error fetching sessions:", error);
-      throw error;
-    }
-  }
-);
-
-// Async thunk to download session summary
-export const downloadSessionSummary = createAsyncThunk(
-  "sessions/downloadSummary",
-  async (roomName) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3001/api/v1/file/download?room_name=${roomName}`,
-        {
-          responseType: "blob" // Important for file download
-        }
-      );
-
-      // Create download link
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${roomName}_summary.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      return { success: true, roomName };
-    } catch (error) {
-      console.error("Error downloading summary:", error);
-      throw error;
-    }
-  }
-);
 
 const sessionSlice = createSlice({
   name: "sessions",
@@ -52,39 +7,64 @@ const sessionSlice = createSlice({
     sessions: [],
     loading: false,
     error: null,
-    downloading: null, // Track which session is downloading
   },
   reducers: {
-    clearError: (state) => {
-      state.error = null;
+    setHistory: (state, action) => {
+      state.sessions = action.payload;
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchSessions.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchSessions.fulfilled, (state, action) => {
-        state.loading = false;
-        state.sessions = action.payload;
-      })
-      .addCase(fetchSessions.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || "Failed to fetch sessions";
-      })
-      .addCase(downloadSessionSummary.pending, (state, action) => {
-        state.downloading = action.meta.arg; // room_name being downloaded
-      })
-      .addCase(downloadSessionSummary.fulfilled, (state) => {
-        state.downloading = null;
-      })
-      .addCase(downloadSessionSummary.rejected, (state, action) => {
-        state.downloading = null;
-        state.error = action.error.message || "Failed to download summary";
-      });
   },
 });
 
-export const { clearError } = sessionSlice.actions;
+export const { setHistory } = sessionSlice.actions;
+
+export const getSessions = (userId) => {
+  return async (dispatch) => {
+    const { data } = await axios.get(
+      `http://localhost:3001/api/v1/session/all?userId=${userId}`
+    );
+
+    dispatch(setHistory(data));
+  };
+};
+
+// download summary pdf
+export const downloadPdf = (roomId) => {
+  return async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/api/v1/file/download?room_name=${roomId}`,
+        {
+          responseType: "blob",
+        }
+      );
+
+      if (!response || !response.data) {
+        throw new Error("No file data received.");
+      }
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+
+      // Validate file is actually a PDF blob
+      if (blob.size === 0) {
+        throw new Error("Received empty PDF file.");
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      const topicName = roomId.split("_")[0] || "summary";
+      link.href = url;
+      link.download = `${topicName}_summary.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PDF Download Error:", err);
+      alert("Failed to download PDF. Check backend response.");
+    }
+  };
+};
+
 export default sessionSlice.reducer;

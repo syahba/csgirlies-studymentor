@@ -1,29 +1,42 @@
-import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Navbar from "../components/common/Navbar.jsx";
 import PrimaryButton from "../components/common/PrimaryButton.jsx";
-import SessionCard from "../components/common/SessionCard.jsx";
-import { fetchStudySessions } from "../redux/slices/studySessionsSlice";
+import SummaryCard from "../components/quiz/SummaryCard.jsx";
+import { downloadPdf, getSessions } from "../redux/slices/sessionSlice.js";
+import { formatTopicName } from "../utils/getTopicName.js";
 
 function HomePage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const storageKey = "registerStatus";
 
-  const { sessions, loading, error } = useSelector((state) => state.studySessions);
-  const userId = useSelector((state) => state.user.userId);
+  // get user info & session history
+  const { userId, school } = useSelector((state) => state.user);
+  const { summaryHistories } = useSelector((state) => state.session);
+  const registerStatus = JSON.parse(localStorage.getItem(storageKey));
 
+  // redirect if user has not registered
+  useEffect(() => {
+    if (!registerStatus) {
+      navigate("/register");
+    }
+  }, [registerStatus, navigate]);
+
+  // fetch previous sessions once userId is available
   useEffect(() => {
     if (userId) {
-      dispatch(fetchStudySessions(userId));
+      dispatch(getSessions(userId));
     }
-  }, [dispatch, userId]);
+  }, [userId, dispatch]);
 
   return (
     <div className="bg-linear-to-tr from-[var(--darker-secondary)] to-[var(--secondary)] min-h-screen">
       <Navbar accentColor={"orange"}></Navbar>
 
       <div className="flex flex-col items-center justify-center mt-3">
+        {/* Header and Start Session button */}
         <div className="flex items-center justify-evenly w-full">
           <h2 className="text-[var(--neutral)]">
             Previous Topic's{" "}
@@ -37,26 +50,22 @@ function HomePage() {
           ></PrimaryButton>
         </div>
 
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-center mt-4 mb-6 max-w-7xl px-4">
-          {loading ? (
-            <div className="col-span-full flex justify-center items-center py-12">
-              <div className="text-[var(--neutral)] text-lg">Loading sessions...</div>
-            </div>
-          ) : error ? (
-            <div className="col-span-full flex justify-center items-center py-12">
-              <div className="text-red-400 text-lg">Error loading sessions: {error}</div>
-            </div>
-          ) : sessions.length === 0 ? (
-            <div className="col-span-full flex flex-col justify-center items-center py-12">
-              <div className="text-[var(--neutral)] text-xl mb-2">Nothing to display</div>
-              <div className="text-[var(--neutral)] text-sm opacity-75">
-                Start your first study session to see summaries here!
-              </div>
-            </div>
-          ) : (
-            sessions.map((session) => (
-              <SessionCard key={session.room_name} session={session} />
+        {/* SESSION HISTORY CARDS */}
+        <div className="grid gap-6 grid-cols-3 justify-center mt-4 mb-6">
+          {summaryHistories?.data?.length > 0 ? (
+            summaryHistories.data.map((session, idx) => (
+              <SummaryCard
+                key={idx}
+                date={session.date}
+                topic={formatTopicName(session.room_name)}
+                school={school}
+                onClick={() => dispatch(downloadPdf(session.room_name))}
+              />
             ))
+          ) : (
+            <h4 className="text-[var(--neutral)] col-span-3 mt-8">
+              No previous sessions yet. Start learning!
+            </h4>
           )}
         </div>
       </div>

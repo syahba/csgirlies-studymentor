@@ -28,13 +28,10 @@ function SetUpPage() {
   // Redux state
   const reduxTopic = useSelector((state) => state.setup.input);
   const reduxRoomName = useSelector((state) => state.setup.room_name);
-  const reduxUploadedFiles = useSelector((state) => state.setup.uploadedFiles);
-  const reduxFilePaths = useSelector((state) => state.setup.file_paths);
-  const reduxUserId = useSelector((state) => state.user.userId);
-  const reduxMentor = useSelector((state) => state.mentor.mentor);
-
-  // If not registered yet, use test fallback
-  const userId = reduxUserId || "49ea6d66-016a-4640-8fbe-7b072cf035c0";
+  const reduxUploadedFiles = useSelector((state) => state.setup.uploadedFiles) || [];
+  const reduxFilePaths = useSelector((state) => state.setup.file_paths) || [];
+  const { userId } = useSelector((state) => state.user);
+  const reduxMentor = useSelector((state) => state.mentor.mentor) || {};
 
   // ui state
   const [mentorIndex, setMentorIndex] = useState(0);
@@ -48,7 +45,11 @@ function SetUpPage() {
   // mentor signature colors
   const mentorColors = ["light-yellow", "purple", "black"];
   // mentor titles
-  const mentorTitles = ["The Tough-Love Coach", "The Supportive Teacher", "The Chaotic Bestie"]
+  const mentorTitles = [
+    "The Tough-Love Coach",
+    "The Supportive Teacher",
+    "The Chaotic Bestie",
+  ];
   // mentor images
   const mentorImages = ["/tough_love.png", "/supportive_teacher.png", "/chaotic_bestie.png"];
 
@@ -56,7 +57,7 @@ function SetUpPage() {
   useEffect(() => {
     dispatch(getMentor(mentorIds[0]));
   }, []);
-  
+
   // mentor carousel
   const nextHandler = () => {
     const newIndex = (mentorIndex + 1) % mentorIds.length;
@@ -81,7 +82,7 @@ function SetUpPage() {
     }
   };
 
-  // fil input (add raw File objects + remove file by index
+  // file input (add raw File objects + remove file by index
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     dispatch(addFiles(files));
@@ -123,14 +124,20 @@ function SetUpPage() {
 
       const finalFilePaths = reduxFilePaths || [];
 
-      // add session to backend
-      await dispatch(
-        addSession({
-          userId,
-          room_name: finalRoomName,
-          file_path: finalFilePaths,
-        })
-      );
+    // add session to backend
+    const payload = {
+      userId,
+      room_name: finalRoomName,
+      file_path: finalFilePaths,
+    };
+
+    try {
+      await dispatch(addSession(payload));
+    } catch (err) {
+      console.error("Add session failed:", err);
+      alert("Failed to create session. Please try again.");
+      return;
+    }
 
       navigate(`/session/${finalRoomName}`);
     } catch (error) {
@@ -178,7 +185,7 @@ function SetUpPage() {
     labelColor = "text-[var(--neutral)]";
   }
 
-  return (
+  return Object.keys(reduxMentor).length !== 0 ? (
     <div className={`bg-linear-to-tr ${linearGradient} min-h-screen`}>
       <Navbar accentColor={mentorColors[mentorIndex]}></Navbar>
 
@@ -342,6 +349,13 @@ function SetUpPage() {
             outlineColor={outlineColor}
           ></SecondaryButton>
         </div>
+      </div>
+    </div>
+  ) : (
+    <div className={`bg-linear-to-tr ${linearGradient} min-h-screen`}>
+      <Navbar accentColor={mentorColors[mentorIndex]}></Navbar>
+      <div className="flex items-center justify-center h-screen w-screen">
+        <h3 className="text-[var(--neutral)]">Loading...</h3>
       </div>
     </div>
   );
