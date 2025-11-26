@@ -11,9 +11,11 @@ import PrimaryButton from "../components/common/PrimaryButton";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useRoomContext } from "@livekit/components-react";
 import { AgentVideo } from "../components/livekit/videoComponent";
 import { StudyPageWrapper } from "../components/livekit/studyPageWrapper";
 import FlashCardContainer from "../components/flashcard/FlashCardContainer";
+import LLMTextDisplay from "../components/common/LLMTextDisplay";
 
 function StudyPage() {
   const navigate = useNavigate();
@@ -28,11 +30,44 @@ function StudyPage() {
 
 function StudyPageContent({ navigate }) {
   const { localParticipant } = useLocalParticipant();
+  const room = useRoomContext();
+  const roomName = useSelector((state) => state.setup.room_name);
   const [micEnabled, setMicEnabled] = useState(true);
 
   useEffect(() => {
     localParticipant.setMicrophoneEnabled(true);
   }, [localParticipant]);
+
+  const handleExitSession = async () => {
+    try {
+      // Trigger session summary generation
+      if (room && roomName) {
+        console.log("Generating session summary for room:", roomName);
+
+        // Find the agent participant and send RPC to trigger summary generation
+        const participants = room.remoteParticipants;
+        const agentParticipant = Object.values(participants).find(p =>
+          p.identity === 'simli-avatar-agent'
+        );
+
+        if (agentParticipant) {
+          await room.localParticipant.performRpc({
+            destinationIdentity: agentParticipant.identity,
+            method: "generateSessionSummary",
+            payload: JSON.stringify({ room_name: roomName })
+          });
+          console.log("Session summary generation triggered");
+        }
+      }
+
+      // Navigate back to home (this will trigger the cleanup in StudyPageWrapper)
+      navigate("/");
+    } catch (error) {
+      console.error("Error during session exit:", error);
+      // Still navigate even if summary generation fails
+      navigate("/");
+    }
+  };
 
   return (
     <div className="bg-linear-to-tr from-[var(--lighter-accent-2)] to-[var(--accent-2)] min-h-screen">
@@ -78,20 +113,14 @@ function StudyPageContent({ navigate }) {
               boxShadow: "4px 4px 10px rgba(0,0,0,0.1)",
               cursor: "pointer",
             }}
+            onClick={handleExitSession}
           />
         </div>
 
         <div className="flex justify-center items-center gap-20">
           <div className="flex flex-col items-center justify-center gap-8">
             <AgentVideo />
-            <div className="text-[var(--neutral)] flex flex-col justify-center items-center gap-1 text-caption">
-              <p className="bg-[var(--black)]/50 px-2">
-                Hi, Joe! Ready to study some ecosystems? Why dont you tell me
-              </p>
-              <p className="bg-[var(--black)]/50 px-2">
-                more about what you’ve learned so far?
-              </p>
-            </div>
+            <LLMTextDisplay />
           </div>
 
           <div className="flex flex-col items-end">

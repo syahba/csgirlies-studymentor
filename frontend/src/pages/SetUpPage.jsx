@@ -49,6 +49,8 @@ function SetUpPage() {
   const mentorColors = ["light-yellow", "purple", "black"];
   // mentor titles
   const mentorTitles = ["The Tough-Love Coach", "The Supportive Teacher", "The Chaotic Bestie"]
+  // mentor images
+  const mentorImages = ["/tough_love.png", "/supportive_teacher.png", "/chaotic_bestie.png"];
 
   // fetch mentor 0 when page loads
   useEffect(() => {
@@ -105,7 +107,7 @@ function SetUpPage() {
       }
 
       // save mentor selection to redux
-      dispatch(selectMentor(mentors[mentorIndex].id));
+      dispatch(selectMentor(mentorIds[mentorIndex]));
 
       // upload files (only if user selected any)
       if (reduxUploadedFiles.length > 0) {
@@ -186,7 +188,13 @@ function SetUpPage() {
         </h2>
 
         <div className="flex flex-row-reverse items-center justify-center gap-16 mt-7">
-          <div className="bg-[var(--neutral)] w-96 h-96 rounded-full"></div>
+          <div className="w-96 h-96 rounded-full overflow-hidden shadow-[4px_4px_16px_rgba(0,0,0,0.1)]">
+            <img
+              src={mentorImages[mentorIndex]}
+              alt={`${mentorTitles[mentorIndex]} mentor`}
+              className="w-full h-full object-cover"
+            />
+          </div>
 
           <div className="flex flex-col gap-6">
             {/* Topic + File Input Box */}
@@ -257,7 +265,7 @@ function SetUpPage() {
               <div className="bg-[var(--neutral)] p-5 rounded-3xl shadow-[4px_4px_16px_rgba(0,0,0,0.1)] mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-[var(--black)]">
-                    {reduxMentor?.data.name}
+                    {reduxMentor?.data?.name || mentorTitles[mentorIndex].split(' ')[1] || 'Mentor'}
                   </h3>
                   <FontAwesomeIcon
                     icon={faVolumeHigh}
@@ -276,7 +284,7 @@ function SetUpPage() {
                 </p>
 
                 <p className="text-body text-[var(--black)] max-w-96">
-                  {reduxMentor?.data.description}
+                  {reduxMentor?.data?.description || 'A helpful AI study assistant ready to help you learn!'}
                 </p>
               </div>
 

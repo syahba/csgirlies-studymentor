@@ -3,6 +3,7 @@ import user from "./slices/userSlice";
 import mentor from "./slices/mentorSlice";
 import session from "./slices/sessionSlice";
 import setup from "./slices/setupSlice";
+import studySessions from "./slices/studySessionsSlice";
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     mentor,
     session,
     setup,
+    studySessions,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// Async thunk to fetch sessions
-export const fetchSessions = createAsyncThunk(
-  "sessions/fetchSessions",
+// Async thunk to fetch study sessions
+export const fetchStudySessions = createAsyncThunk(
+  "studySessions/fetchStudySessions",
   async (userId) => {
     try {
       const response = await axios.get(
@@ -11,7 +11,7 @@ export const fetchSessions = createAsyncThunk(
       );
       return response.data.data; // The API returns { data: sessions[] }
     } catch (error) {
-      console.error("Error fetching sessions:", error);
+      console.error("Error fetching study sessions:", error);
       throw error;
     }
   }
@@ -19,7 +19,7 @@ export const fetchSessions = createAsyncThunk(
 
 // Async thunk to download session summary
 export const downloadSessionSummary = createAsyncThunk(
-  "sessions/downloadSummary",
+  "studySessions/downloadSummary",
   async (roomName) => {
     try {
       const response = await axios.get(
@@ -46,8 +46,8 @@ export const downloadSessionSummary = createAsyncThunk(
   }
 );
 
-const sessionSlice = createSlice({
-  name: "sessions",
+const studySessionsSlice = createSlice({
+  name: "studySessions",
   initialState: {
     sessions: [],
     loading: false,
@@ -61,17 +61,17 @@ const sessionSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchSessions.pending, (state) => {
+      .addCase(fetchStudySessions.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchSessions.fulfilled, (state, action) => {
+      .addCase(fetchStudySessions.fulfilled, (state, action) => {
         state.loading = false;
         state.sessions = action.payload;
       })
-      .addCase(fetchSessions.rejected, (state, action) => {
+      .addCase(fetchStudySessions.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to fetch sessions";
+        state.error = action.error.message || "Failed to fetch study sessions";
       })
       .addCase(downloadSessionSummary.pending, (state, action) => {
         state.downloading = action.meta.arg; // room_name being downloaded
@@ -86,5 +86,5 @@ const sessionSlice = createSlice({
   },
 });
 
-export const { clearError } = sessionSlice.actions;
-export default sessionSlice.reducer;
+export const { clearError } = studySessionsSlice.actions;
+export default studySessionsSlice.reducer;
