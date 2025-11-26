@@ -1,0 +1,5 @@
+livekit
+livekit-agents[deepgram,silero]
+python-dotenv
+aiohttp
+ollama
